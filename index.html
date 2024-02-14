@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пример выполнения скрипта Braintree с использованием токена из URL</title>
+</head>
+<body>
+    <!-- Подключение скриптов Braintree -->
+    <script src="https://js.braintreegateway.com/web/3.87.0/js/client.min.js"></script>
+    <script src="https://js.braintreegateway.com/web/3.87.0/js/data-collector.min.js"></script>
+
+    <!-- Создаем элемент на странице для вывода данных -->
+    <div id="deviceDataDisplay"></div>
+
+    <script>
+        // Функция для получения значения токена из параметров URL
+        function getTokenFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('token');
+        }
+
+        // Получение токена из параметров URL
+        const token = getTokenFromUrl();
+
+        if (!token) {
+            console.error('Токен не найден в параметрах URL');
+        } else {
+            // Создание экземпляра Braintree с использованием токена из URL
+            braintree.client.create({
+                authorization: token
+            }, function (err, clientInstance) {
+                if (err) {
+                    // Обработка ошибки при создании клиентского экземпляра
+                    console.error('Ошибка при создании клиентского экземпляра:', err);
+                    return;
+                }
+
+                // Создание Data Collector с передачей клиентского экземпляра
+                braintree.dataCollector.create({
+                    client: clientInstance // Передача клиентского экземпляра
+                }, function (err, dataCollectorInstance) {
+                    if (err) {
+                        // Обработка ошибки при создании Data Collector
+                        console.error('Ошибка при создании Data Collector:', err);
+                        return;
+                    }
+
+                    // В этой точке вы можете получить доступ к значению deviceData и использовать его
+                    var deviceData = dataCollectorInstance.deviceData;
+                    console.log('Данные устройства:', deviceData);
+
+                    // Выводим значение deviceData на страницу в виде текста
+                    document.getElementById('deviceDataDisplay').innerText = JSON.stringify(deviceData, null, 2);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
